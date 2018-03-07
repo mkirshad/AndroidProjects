@@ -1,0 +1,85 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.androidprojects.MainActivity"
+ >
+
+    <TextView
+        android:id="@+id/textMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="right"
+        android:layout_marginRight="8dp"
+        android:text="No Internet, Please turn on Wifi or Mobile Data"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="16sp"
+        android:textStyle="italic"
+        android:typeface="serif"
+        android:visibility="invisible"
+  />
+
+    <Button
+        android:id="@+id/send"
+        android:layout_width="150dp"
+        android:layout_height="70dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/textMsg"
+        android:text="Submit Project Proposal"
+        android:layout_alignParentTop="true"
+        />
+
+    <EditText
+        android:id="@+id/editEmail"
+        style="@style/Widget.AppCompat.EditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/multiAutoCompleteProjDetail"
+        android:layout_alignStart="@+id/multiAutoCompleteProjDetail"
+        android:layout_below="@+id/send"
+        android:ems="10"
+        android:hint="Your Email"
+        android:inputType="textEmailAddress"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/editSkype"
+        style="@android:style/Widget.EditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editEmail"
+        android:ems="10"
+        android:hint="SkypeId"
+        android:inputType="textPersonName"
+        android:visibility="visible" />
+
+    <MultiAutoCompleteTextView
+        android:id="@+id/multiAutoCompleteProjDetail"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editSkype"
+        android:contentDescription="Please enter your Project Detail"
+        android:scrollbars="horizontal|vertical"
+        android:selectAllOnFocus="true"
+        android:shadowColor="@color/colorAccent"
+        android:text="I want to buy your services to develop an android app for"
+        android:textAlignment="textStart"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:visibility="visible" />
+
+
+
+
+
+
+
+
+
+</RelativeLayout>

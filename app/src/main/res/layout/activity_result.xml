@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context="com.androidprojects.ResultActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnHome"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="36dp"
+        android:text="Your project proposal has been submitted successfully.\nYou will be contacted soon on your provided email address with project plan including estimated project development cost and estimated project development time.
+" />
+
+    <Button
+        android:id="@+id/btnHome"
+        style="@android:style/Widget.Button.Inset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="74dp"
+        android:layout_marginStart="74dp"
+        android:layout_marginTop="14dp"
+        android:text="Home" />
+
+    <Button
+        android:id="@+id/btnExit"
+        style="@android:style/Widget.Button.Inset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/btnHome"
+        android:layout_marginEnd="84dp"
+        android:layout_marginRight="84dp"
+        android:text="Exit" />
+</RelativeLayout>
