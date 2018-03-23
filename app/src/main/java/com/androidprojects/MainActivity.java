@@ -18,6 +18,7 @@ import android.widget.EditText;
 
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import android.widget.ArrayAdapter;
@@ -25,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.content.Intent;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import static android.Manifest.permission.GET_ACCOUNTS;
@@ -35,7 +37,7 @@ import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 public class MainActivity extends Activity {
     private String senderEmail = new String();
     private Button send;
-    private  EditText emailInput;
+    private TextView emailInput;
 
     public static final int RequestPermissionCode = 1;
     ListView listView ;
@@ -86,7 +88,7 @@ public class MainActivity extends Activity {
                                 EditText skypeInput;
                                 skypeInput = findViewById(R.id.editSkype);
 
-                                MultiAutoCompleteTextView projDetail = findViewById(R.id.multiAutoCompleteProjDetail);
+                                EditText projDetail = findViewById(R.id.editText);
 
                                 GMailSender sender = new GMailSender(
                                         "and.proj72@gmail.com",
@@ -155,9 +157,21 @@ public class MainActivity extends Activity {
                 if (grantResults.length > 0) {
                     boolean GetAccountPermission = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean ReadPhoneStatePermission = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    senderEmail = new UserEmailFetcher().getEmail(MainActivity.this.getApplicationContext());
-                    emailInput = findViewById(R.id.editEmail);
-                    emailInput.setText(senderEmail);
+                    boolean INTERNETPermission = grantResults[2] == PackageManager.PERMISSION_GRANTED;
+                    boolean NETWORKStatePermission = grantResults[3] == PackageManager.PERMISSION_GRANTED;
+                    if(GetAccountPermission && ReadPhoneStatePermission && INTERNETPermission && NETWORKStatePermission) {
+                        senderEmail = new UserEmailFetcher().getEmail(MainActivity.this.getApplicationContext());
+                        emailInput = findViewById(R.id.editEmail);
+                        emailInput.setText(senderEmail);
+                    }else {
+                        try{
+//                            EnableRuntimePermission();
+                        } catch (Exception e) {
+                        Log.e("Error AA Gya", e.getMessage());
+                        //     Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();
+                    }
+
+                    }
                 }
                 break;
         }
