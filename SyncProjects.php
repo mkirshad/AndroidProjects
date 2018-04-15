@@ -1,5 +1,7 @@
 <?php
 	error_reporting(E_ERROR | E_PARSE);
+	$dateTime = date('Y-m-d H:i:s', time());
+
 	$mysqli = new mysqli("localhost", "kashifir_user1", "Fastnu72!","kashifir_db1");
 	
 	if (mysqli_connect_errno()) {
@@ -11,8 +13,9 @@
 	/* grab the posts from the db */
 	
 	$p_string = $json_str = file_get_contents('php://input');
-	$p_string = '{
-   "projects":[
+
+	/*
+	$p_string = '{"LastUpdatedProject":"2018-04-14 11:29:17","LastUpdatedUser":"2018-04-14 10:32:49","projects":[
       {
          "ChildProjects":[
             {
@@ -120,35 +123,44 @@
       "UpdatedAt":"2018-03-27 21:41:35",
 	  "CreatedAt":"2018-03-27 21:41:35",
       "WatsAppNo":""
-   },
-   "LastProjectServerId":"0",
-   "LastUpdatedUser":"2018-03-27 21:41:35"
-}';
+   },"user":{"AddressLine1":"","AddressLine2":"","City":"","Country":"","CreatedAt":"2018-04-12 00:47:22","EmailAddress":"kashif.ir@gmail.com","FirstName":"","Id":1,"IsSynched":1,"LastName":"","MiddleName":"","ServerId":3,"ShowUnreadStoriesOnly":0,"SkypeId":"","State":"","SyncDuration":1,"UpdatedAt":"2018-04-11 19:48:22","WatsAppNo":""}}';
+	*/
 
 	$query = "INSERT INTO AndroidProjects_Requests(Request) VALUES ('$p_string')";
-	$mysqli->query($query);
+	$mysqli->query($query) or die('Errant query:  '.$query);;
+	$isLocked = 0;
 	
 	$json_obj = json_decode($p_string, true);
 	$userArr = [];
 	$projArr = [];
 	$results = [];
-
 	$user = $json_obj['user'];
-	if($user['IsSynched'] == 0 || $user['ServerId'] == 0){
+	if($user['EmailAddress'] == 'kashif.ir@gmail.com'){
+		$query = "SELECT *
+			FROM AndroidProjects_Users 
+			WHERE UpdatedAt > '".$json_obj['LastUpdatedUser']."'";
+			$result = $mysqli->query($query) or die('Errant query:  '.$query);
+			$userRows = $result->fetch_all(MYSQLI_ASSOC);
+	}else{
+		$userRows = [];
+	}
+	
+//	if($user['IsSynched'] == 0 || $user['ServerId'] == 0){
 				$userEmailAddress = $user['EmailAddress'];
-				$query = "SELECT Id, count(*) as rowCount FROM AndroidProjects_Users WHERE EmailAddress = '".$user['EmailAddress']."'";
+				$query = "SELECT Id, count(*) as rowCount, MAX(IsLocked) IsLocked FROM AndroidProjects_Users WHERE EmailAddress = '".$user['EmailAddress']."'";
 				$result = $mysqli->query($query) or die('Errant query:  '.$query);
 				$row = $result->fetch_array(MYSQLI_ASSOC);
 				if($row['rowCount'] == 0){
 					$query = "INSERT INTO AndroidProjects_Users (FirstName, MiddleName, LastName, EmailAddress, SkypeId, WatsAppNo, AddressLine1, AddressLine2, 
-																	City, State, Country, UnReadOnly, SyncDuration,UpdatedAt, CreatedAt)
+																	City, State, Country, UnReadOnly, SyncDuration,UpdatedAt, CreatedAt, IsLocked)
 							VALUES('".$user['FirstName']."','".$user['MiddleName']."','".$user['LastName']."','".$user['EmailAddress']."','".$user['SkypeId']."','"
 							.$user['WatsAppNo']."','".$user['AddressLine1']."','".$user['AddressLine2']."','".$user['City']."','".$user['State']."','"
-							.$user['Country']."','".$user['ShowUnreadStoriesOnly']."','".$user['SyncDuration']."', now() ,'".$user['CreatedAt']."'". ")";
+							.$user['Country']."','".$user['ShowUnreadStoriesOnly']."','".$user['SyncDuration']."','". $dateTime ."','".$dateTime."'". ",1)";
 					
 					$mysqli->query($query) or die('Errant query:  '.$query);
 					$userArr[$user['Id']]=$mysqli->insert_id;
 				}ELSE{
+					$isLocked = $row['IsLocked'];
 					$userArr[$user['Id']]=$row['Id'];
 					$query = "UPDATE AndroidProjects_Users 
 					SET FirstName = '".$user['FirstName']."'
@@ -163,13 +175,13 @@
 					   , Country = '".$user['Country']."'
 					   , UnReadOnly = '".$user['ShowUnreadStoriesOnly']."'
 					   , SyncDuration = '".$user['SyncDuration']."'
-					   , UpdatedAt = now()
-					   , CreatedAt = '".$user['CreatedAt']."'
+					   , UpdatedAt = '".$dateTime."'
+					   , IsLocked = 1
 					   WHERE Id = ". $row['Id'];
 					   $mysqli->query($query);
 				}
-			}
-	
+//			}
+// if($isLocked == 0){
 			foreach($json_obj['projects'] as $key => $proj){
 			
 						$projParent = 0;
@@ -180,7 +192,7 @@
 						if($proj['ServerId'] == 0){
 							$query = "INSERT INTO AndroidProjects_Projects (Story, FilePaths, EstimatedHrs, EstimateCost, DeliveryDate, UpdatedAt,CreatedAt, UserId, ParentId)
 									VALUES('".$proj['Story']."','".$proj['FilePaths']."','".$proj['EstimatedHrs']."','".$proj['EstimateCost']."','".$proj['DeliveryDate']."','"
-									.$proj['UpdatedAt']."', now() ,'" . $userArr[$proj['UserId']] . "','".$projParent. "')";
+									.$dateTime."','". $dateTime."' ,'" . $userArr[$proj['UserId']] . "','".$projParent. "')";
 							$mysqli->query($query) or die('Errant query:  '.$query);
 							$projArr[$proj['Id']]=$mysqli->insert_id;
 						}elseif($proj['IsSynched'] == 0){
@@ -192,8 +204,7 @@
 							   , EstimatedHrs = '".$proj['EstimatedHrs']."'
 							   , EstimateCost = '".$proj['EstimateCost']."'
 							   , DeliveryDate = '".$proj['DeliveryDate']."'
-							   , UpdatedAt = now()
-							   , CreatedAt = '".$proj['CreatedAt']."'
+							   , UpdatedAt = '".$dateTime.";
 							   , UserId = '".$userArr[$proj['UserId']]."'
 							   , ParentId = '".$projParent."'
 							   WHERE Id = ". $proj['ServerId'];
@@ -214,7 +225,7 @@
 						if($proj['ServerId'] == 0){
 							$query = "INSERT INTO AndroidProjects_Projects (Story, FilePaths, EstimatedHrs, EstimateCost, DeliveryDate, UpdatedAt,CreatedAt, UserId, ParentId)
 									VALUES('".$proj['Story']."','".$proj['FilePaths']."','".$proj['EstimatedHrs']."','".$proj['EstimateCost']."','".$proj['DeliveryDate']."',
-									now(),'".$proj['CreatedAt']."','" . $userArr[$proj['UserId']] . "','".$projParent. "')";
+									'".$dateTime."','".$dateTime."','" . $userArr[$proj['UserId']] . "','".$projParent. "')";
 							$mysqli->query($query) or die('Errant query:  '.$query);
 							$projArr[$proj['Id']]=$mysqli->insert_id;
 						}elseif($proj['IsSynched'] == 0){
@@ -226,8 +237,7 @@
 							   , EstimatedHrs = '".$proj['EstimatedHrs']."'
 							   , EstimateCost = '".$proj['EstimateCost']."'
 							   , DeliveryDate = '".$proj['DeliveryDate']."'
-							   , UpdatedAt = now()
-							   , CreatedAt = '".$proj['CreatedAt']."'
+							   , UpdatedAt = '".$dateTime."'
 							   , UserId = '".$userArr[$proj['UserId']]."'
 							   , ParentId = '".$projParent."'
 							   WHERE Id = ". $proj['ServerId'];
@@ -248,33 +258,39 @@
 		
 	$query = "SELECT a.Id AS ServerId, a.Story , a.FilePaths, a.EstimatedHrs, a.EstimateCost, a.DeliveryDate, a.CreatedAt, a.UpdatedAt, a.UserId, a.ParentId
 	FROM AndroidProjects_Projects a LEFT JOIN  AndroidProjects_Projects b ON a.ParentId = b.Id
-	WHERE a.Id > '".$json_obj['LastProjectServerId']."'
+	WHERE a.UpdatedAt > '".$json_obj['LastUpdatedProject']."'
 	AND (a.UserId = '".array_values($userArr)[0]."' OR b.UserId = '".array_values($userArr)[0]."' OR '".$user['EmailAddress']."' = 'kashif.ir@gmail.com' )".
 	 $queryExc
+	 ." ORDER BY a.Id"
 	;
 	$result = $mysqli->query($query) or die('Errant query:  '.$query);
 	$projRows = $result->fetch_all(MYSQLI_ASSOC);
 				
 				
-	if($user['EmailAddress'] == 'kashif.ir@gmail.com'){
-		$query = "SELECT *
-			FROM AndroidProjects_Users 
-			WHERE UpdatedAt > '".$json_obj['LastUpdatedUser']."'";
-			$result = $mysqli->query($query) or die('Errant query:  '.$query);
-			$userRows = $result->fetch_all(MYSQLI_ASSOC);
-	}else{
-		$userRows = [];
-	}
-				
-				
-				
-
 	
-	$results['userIds'] = $userArr;
-	$results['projectIds'] = $projArr;
+				
+	$UsersArr = [];
+	foreach($userArr as $key=>$value){
+		$UsersArr[]=array('UserId'=>$key, 'ServerUserId'=>$value);
+	}
+	
+	$projsArr = [];
+	foreach($projArr as $key=>$value){
+		$projsArr[]=array('ProjectId'=>$key, 'ServerProjectId'=>$value);
+	}				
+
+	$results['UpdatedAt'] = $dateTime;
+	$results['userIds'] = $UsersArr;
+	$results['projectIds'] = $projsArr;
 	$results['newProjects'] = $projRows;
 	$results['newUsers'] = $userRows;
-
+	
+	
+	$query = "UPDATE AndroidProjects_Users 
+					SET IsLocked = 0
+					   WHERE Id = ".array_values($userArr)[0]; 
+	$mysqli->query($query);
+// }
 	header('Content-type: application/json');
 	echo json_encode(array('results'=>$results));
 

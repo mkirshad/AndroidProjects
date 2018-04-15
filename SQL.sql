@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS AndroidProjects_Users (
             SyncDuration INTEGER, 
             CreatedAt DATETIME, 
             UpdatedAt DATETIME, 
+			IsLocked int default 0 not null,
             CONSTRAINT uq_email UNIQUE (EmailAddress)
             );
 
